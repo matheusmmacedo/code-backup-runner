@@ -20,5 +20,8 @@ jobs:
           set -e
           git clone --mirror "https://x-access-token:${PAT}@github.com/matheusmmacedo/${{ matrix.repo }}.git" src.git
           cd src.git
-          git push --mirror "https://x-access-token:${PAT}@github.com/matheusmmacedo/${{ matrix.repo }}-backup.git"
+          # Espelha branches e tags (historico completo), excluindo refs ocultos de PR (refs/pull/*),
+          # que o GitHub recusa empurrar ("deny updating a hidden ref").
+          git push --prune --force "https://x-access-token:${PAT}@github.com/matheusmmacedo/${{ matrix.repo }}-backup.git" \
+            "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
           echo "Espelho de ${{ matrix.repo }} concluido em $(date -u)"
