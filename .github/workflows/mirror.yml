@@ -1,0 +1,24 @@
+name: Espelho diario do codigo
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # todo dia 06:00 UTC (03:00 BRT)
+  workflow_dispatch: {}
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: [klaos, frontdesk]
+    steps:
+      - name: Espelhar ${{ matrix.repo }} -> ${{ matrix.repo }}-backup
+        env:
+          PAT: ${{ secrets.BACKUP_PAT }}
+        run: |
+          set -e
+          git clone --mirror "https://x-access-token:${PAT}@github.com/matheusmmacedo/${{ matrix.repo }}.git" src.git
+          cd src.git
+          git push --mirror "https://x-access-token:${PAT}@github.com/matheusmmacedo/${{ matrix.repo }}-backup.git"
+          echo "Espelho de ${{ matrix.repo }} concluido em $(date -u)"
